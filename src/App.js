@@ -1,57 +1,68 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Typography from "@mui/material/Typography";
+
+// pages for routes
+import HomePage from "./features/home/HomePage";
+import DashboardPage from "./features/Dashboard/DashboardPage";
+
+import ProductsPage from "./features/products/ProductsPage";
+import ProductsList from "./features/products/ProductsList";
+import ProductDetail from "./features/products/ProductDetail";
+
+import { CreateUserForm } from "./features/users/CreateUserForm";
+
+import { LoginForm } from "./features/auth/LoginForm";
+import { VendorCreatePage } from "./features/vendor/VendorCreatePage";
+
+import { useDispatch, useSelector } from "react-redux";
+import { updateLoginStatus } from "./features/auth/authSlice";
+import { updateUserVendorAsync } from "./features/vendor/vendorSlice";
+
+import Navbar from "./app/Navbar";
 
 function App() {
+  const { userId, isLoggedIn, status } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  // Update User login state;
+  useEffect(() => {
+    dispatch(updateLoginStatus());
+  }, []);
+
+  // Update User vendor state
+  useEffect(() => {
+    if (isLoggedIn) {
+      dispatch(updateUserVendorAsync(userId));
+    }
+  }, [userId]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
+    <BrowserRouter>
+      <div className="App">
+        <Typography variant="h1">My App</Typography>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="login" element={<LoginForm />} />
+          <Route path="register" element={<CreateUserForm />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="vendor/create" element={<VendorCreatePage />} />
+          <Route path="products" element={<ProductsPage />}>
+            <Route path="" element={<ProductsList />} />
+            <Route path=":productUrl" element={<ProductDetail />} />
+          </Route>
+          <Route
+            path="*"
+            element={
+              <main style={{ padding: "1rem" }}>
+                <p>There's nothing here!</p>
+              </main>
+            }
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 
