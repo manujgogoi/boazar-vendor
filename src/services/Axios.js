@@ -3,7 +3,7 @@ import { BASE_URL, REFRESH_TOKEN_URL } from "../utils/urls";
 
 let axiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 5000,
+  // timeout: 5000,
   headers: {
     Authorization: localStorage.getItem("access_token")
       ? "Bearer " + localStorage.getItem("access_token")
@@ -39,9 +39,10 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
 
     if (typeof error.response === "undefined") {
-      console.log(
-        "A Server/Network error occured. Looks like CORS might be the problem."
-      );
+      console
+        .log
+        // "A Server/Network error occured. Looks like CORS might be the problem."
+        ();
       return Promise.reject(error);
     }
 

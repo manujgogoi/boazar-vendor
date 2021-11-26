@@ -35,7 +35,16 @@ const vendorSlice = createSlice({
   name: "vendor",
   initialState,
 
-  reducers: {},
+  reducers: {
+    addProductToVendorState: (state, action) => {
+      state.vendor.products.unshift(action.payload);
+    },
+    removeProductFromVendorState: (state, action) => {
+      state.vendor.products = state.vendor.products.filter((product) => {
+        return product !== action.payload;
+      });
+    },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -67,5 +76,8 @@ const vendorSlice = createSlice({
 export const selectVendorProductById = (state, id) => {
   state.vendor.products.find((product) => product.id === id);
 };
+
+export const { addProductToVendorState, removeProductFromVendorState } =
+  vendorSlice.actions;
 
 export default vendorSlice.reducer;

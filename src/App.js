@@ -9,6 +9,7 @@ import DashboardPage from "./features/Dashboard/DashboardPage";
 import ProductsPage from "./features/products/ProductsPage";
 import ProductsList from "./features/products/ProductsList";
 import ProductDetail from "./features/products/ProductDetail";
+import ProductEditForm from "./features/products/ProductEditForm";
 
 import { CreateUserForm } from "./features/users/CreateUserForm";
 
@@ -22,7 +23,7 @@ import { updateUserVendorAsync } from "./features/vendor/vendorSlice";
 import Navbar from "./app/Navbar";
 
 function App() {
-  const { userId, isLoggedIn, status } = useSelector((state) => state.auth);
+  const { userId, isLoggedIn } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   // Update User login state;
@@ -51,6 +52,7 @@ function App() {
           <Route path="products" element={<ProductsPage />}>
             <Route path="" element={<ProductsList />} />
             <Route path=":productUrl" element={<ProductDetail />} />
+            <Route path=":productUrl/edit" element={<ProductEditForm />} />
           </Route>
           <Route
             path="*"

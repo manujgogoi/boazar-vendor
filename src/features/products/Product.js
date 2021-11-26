@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axiosInstance from "../../services/Axios";
+// import axios from "axios";
 import Image from "./Image";
 
 const Product = ({ productURL }) => {
@@ -9,24 +10,36 @@ const Product = ({ productURL }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let unmounted = false;
+    // const CancelToken = axios.CancelToken;
+    // const source = CancelToken.source();
     setIsLoading(true);
     axiosInstance
-      .get(productURL)
+      .get(productURL, {
+        // CancelToken: source.token,
+      })
       .then((res) => {
-        setProduct(res.data);
-        setIsLoading(false);
+        if (!unmounted) {
+          setProduct(res.data);
+          setIsLoading(false);
+        }
       })
       .catch((error) => {
-        console.log(error);
-        setIsLoading(false);
+        if (!unmounted) {
+          console.log(error);
+          setIsLoading(false);
+        }
       });
-  }, [productURL]);
+
+    return () => {
+      // source.cancel("Operation cancelled by the user");
+      unmounted = true;
+    };
+  }, []);
 
   const Images = () => {
     if (product.images) {
-      return product.images.map((imageURL) => (
-        <Image key={imageURL} imageUrl={imageURL} />
-      ));
+      return <Image imageUrl={product.images[0]} readOnly={true} />;
     }
     return <p>No images</p>;
   };

@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import Product from "./Product";
+import AddProductForm from "./AddProductForm";
 
 const ProductsList = () => {
-  const initialLocalState = Object.freeze({
-    isLoading: false,
-    products: null,
-  });
-
   const { vendor, status } = useSelector((state) => state.vendor);
 
   const RenderElements = () => {
@@ -25,7 +21,8 @@ const ProductsList = () => {
 
   return (
     <div>
-      <h3>Products</h3>
+      <AddProductForm />
+      <h3>Product List</h3>
       <RenderElements />
     </div>
   );
