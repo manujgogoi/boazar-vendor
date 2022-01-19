@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import { addProductToVendorState } from "../vendor/vendorSlice";
 import axiosInstance from "../../services/Axios";
 import { PRODUCT_URL, CATEGORY_URL } from "../../utils/urls";
@@ -220,6 +221,9 @@ const AddProductForm = () => {
 
             // Update vendor products
             dispatch(addProductToVendorState(res.data.url)); // only add url of the product
+
+            // Show a successful toast message
+            toast.success("Product added successfully", { theme: "colored" });
           })
           .catch((err) => {
             setLocalState({
@@ -228,6 +232,8 @@ const AddProductForm = () => {
               status: "failed",
               error: err,
             });
+            // Show an error toast message
+            toast.error("Add product failed", { theme: "colored" });
           });
       } else {
         setLocalState({

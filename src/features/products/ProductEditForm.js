@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axiosInstance from "../../services/Axios";
 import { CATEGORY_URL, PRODUCT_URL } from "../../utils/urls";
 
 const ProductEditForm = () => {
   const { vendor } = useSelector((state) => state.vendor);
   const { productUrl } = useParams();
+  const encodedLink = encodeURIComponent(productUrl);
 
   // ========================================================
   // Local State
@@ -14,6 +15,8 @@ const ProductEditForm = () => {
   const initialLocalState = Object.freeze({
     product: {},
     isLoading: false,
+    isUpdating: false,
+    updateStatus: "",
     status: "idle",
     error: null,
   });
@@ -68,11 +71,6 @@ const ProductEditForm = () => {
       error: null,
     });
 
-    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    // Loading Debug
-    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    console.log(localState.isLoading);
-
     let unmounted = false;
     axiosInstance
       .get(productUrl)
@@ -105,6 +103,7 @@ const ProductEditForm = () => {
           // ==============================================
           // Set products to FormData
           // ==============================================
+          console.log(res.data);
           setFormData({
             ...initialFormData,
             category: res.data.category || 0,
@@ -116,6 +115,9 @@ const ProductEditForm = () => {
             quantity: res.data.quantity || "",
             wholesale_min_quantity: res.data.wholesale_min_quantity || "",
             sku: res.data.sku || "",
+            is_active: res.data.is_active,
+            is_featured: res.data.is_featured,
+            is_downloadable: res.data.is_downloadable,
           });
         }
       })
@@ -252,7 +254,6 @@ const ProductEditForm = () => {
   // Event Handlers
   // ========================================================
   const handleChange = (e) => {
-    console.log(e.target.value);
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -260,6 +261,7 @@ const ProductEditForm = () => {
   };
 
   const toggleCheckBox = (e) => {
+    console.log(e.target.checked);
     setFormData({
       ...formData,
       [e.target.name]: e.target.checked,
@@ -270,7 +272,7 @@ const ProductEditForm = () => {
     e.preventDefault();
     setLocalState({
       ...localState,
-      isLoading: true,
+      isUpdating: true,
       status: "pending",
       error: null,
     });
@@ -321,7 +323,13 @@ const ProductEditForm = () => {
             setLocalState({
               ...localState,
               product: res.data,
-              isLoading: false,
+            });
+          })
+          .then(() => {
+            setLocalState({
+              ...localState,
+              isUpdating: false,
+              updateStatus: "Product updated successfully",
               status: "succeeded",
               error: null,
             });
@@ -330,7 +338,8 @@ const ProductEditForm = () => {
             console.log(error);
             setLocalState({
               ...localState,
-              isLoading: false,
+              isUpdating: false,
+              updateStatus: "Update error",
               status: "failed",
               error: { error: error.message },
             });
@@ -338,7 +347,8 @@ const ProductEditForm = () => {
       } else {
         setLocalState({
           ...localState,
-          isLoading: false,
+          isUpdating: false,
+          updateStatus: "Update error",
           status: "failed",
           error: { error: "Vendor error" },
         });
@@ -347,7 +357,7 @@ const ProductEditForm = () => {
 
     setLocalState({
       ...localState,
-      isLoading: false,
+      isUpdating: false,
     });
 
     return false;
@@ -366,25 +376,42 @@ const ProductEditForm = () => {
         <p>Product not found</p>
       ) : (
         <div>
+          {localState.updateStatus && (
+            <div>
+              <p>{localState.updateStatus}</p>
+              <button
+                onClick={() =>
+                  setLocalState({ ...localState, updateStatus: "" })
+                }
+              >
+                Close
+              </button>
+            </div>
+          )}
           <form>
             <p>Product Id : # {localState.product.id}</p>
             <div>
               <label htmlFor="category">Category </label>
-              {loadingCategoryList || !category ? (
+              {loadingCategoryList ? (
                 "Loading Category..."
               ) : (
                 <select
                   id="category"
                   name="category"
-                  defaultValue={(category && category.url) || 0}
+                  defaultValue={
+                    (localState.product.category &&
+                      localState.product.category) ||
+                    0
+                  }
                   onChange={handleChange}
                 >
                   <option value={0}>No Category</option>
-                  {categoryList.map((cat) => (
-                    <option key={cat.id} value={cat.url}>
-                      {cat.title}
-                    </option>
-                  ))}
+                  {categoryList &&
+                    categoryList.map((cat) => (
+                      <option key={cat.id} value={cat.url}>
+                        {cat.title}
+                      </option>
+                    ))}
                 </select>
               )}
             </div>
@@ -494,7 +521,7 @@ const ProductEditForm = () => {
                 type="checkbox"
                 id="is-active"
                 name="is_active"
-                defaultChecked={formData.is_active}
+                checked={formData.is_active}
                 onChange={toggleCheckBox}
               />
             </div>
@@ -504,7 +531,7 @@ const ProductEditForm = () => {
                 type="checkbox"
                 id="is-featured"
                 name="is_featured"
-                defaultChecked={formData.is_featured}
+                checked={formData.is_featured}
                 onChange={toggleCheckBox}
               />
             </div>
@@ -514,7 +541,7 @@ const ProductEditForm = () => {
                 type="checkbox"
                 id="is-downloadable"
                 name="is_downloadable"
-                defaultChecked={formData.is_downloadable}
+                checked={formData.is_downloadable}
                 onChange={toggleCheckBox}
               />
             </div>
@@ -522,10 +549,11 @@ const ProductEditForm = () => {
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={localState.isLoading}
+                disabled={localState.isUpdating}
               >
-                {localState.isLoading ? "Loading..." : "Update"}
+                {localState.isUpdating ? "Updating..." : "Update"}
               </button>
+              <Link to={`/products/${encodedLink}`}>Go back to detail</Link>
             </div>
           </form>
         </div>

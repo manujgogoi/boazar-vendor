@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 import { Navigate, Link } from "react-router-dom";
 import axiosInstance from "../../services/Axios";
 import { USER_URL } from "../../utils/urls";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.min.css";
 
 export const CreateUserForm = () => {
   const { isLoggedIn } = useSelector((state) => state.auth);
@@ -99,33 +101,27 @@ export const CreateUserForm = () => {
           updateFormData({ ...initialFormData });
         })
         .catch((err) => {
-          console.log(err.response.data);
-
+          let error = "";
           // Update local state
+          if (!err.response) {
+            error = "Network / Server error";
+          } else if (err.response.status === 400) {
+            error = err.response.data.email;
+          } else {
+            error = "Some error occured";
+          }
+          // Flashing error as a toast
+          toast.error(<span>{error}</span>, { theme: "colored" });
           setLocalState({
             ...localState,
             user: null,
             isLoading: false,
             status: "failed",
-            error: err.response.data,
+            error: error,
           });
         });
     }
     return false;
-  };
-
-  const ErrorElement = () => {
-    if (localState.error) {
-      return Object.keys(localState.error).map((keyName, i) => (
-        <li key={i}>
-          {keyName} :
-          {typeof keyName == "string"
-            ? localState.error[keyName]
-            : localState.error[keyName][i]}
-        </li>
-      ));
-    }
-    return "";
   };
 
   return (
@@ -133,14 +129,11 @@ export const CreateUserForm = () => {
       {isLoggedIn && <Navigate to="/dashboard" replace={true} />}
       {localState.status === "succeeded" && localState.user && (
         <p>
-          User ({localState.user.email}) is created successfully.{" "}
+          User ({localState.user.email}) is created successfully.
           <Link to="/login">Click to Login</Link>
         </p>
       )}
       <h3>Register New user</h3>
-      <ul>
-        <ErrorElement />
-      </ul>
       <form>
         <div>
           <label htmlFor="email">Email: </label>

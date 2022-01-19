@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Typography from "@mui/material/Typography";
+import { ToastContainer } from "react-toastify";
 
 // pages for routes
 import HomePage from "./features/home/HomePage";
@@ -63,6 +64,18 @@ function App() {
             }
           />
         </Routes>
+        {/* Toast container to show popup messages */}
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </div>
     </BrowserRouter>
   );

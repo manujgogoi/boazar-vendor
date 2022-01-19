@@ -16,7 +16,7 @@ export const VendorCreatePage = () => {
         {!isLoggedIn && <Navigate to="/login" replace />}
         {isLoggedIn && vendor && <Navigate to="/dashboard" replace={true} />}
         <p>
-          You have not a <strong>vendor</strong>. Please register a vendor.
+          You have no <strong>vendor</strong>. Please register a vendor.
         </p>
         <VendorCreateForm />
       </div>

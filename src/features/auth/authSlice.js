@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axiosInstance from "../../services/Axios";
+import jwt_decode from "jwt-decode";
 import { loginAPI } from "./authAPI";
 
 const initialState = {
@@ -16,7 +17,16 @@ export const userLoginAsync = createAsyncThunk(
       const response = await loginAPI(formData.email, formData.password);
       return response.data;
     } catch (e) {
-      return rejectWithValue(e.response.data);
+      // Format response error before reject
+      let errMsg = "";
+      if (!e.response) {
+        errMsg = "Network / Server error";
+      } else if (e.response.status === 401) {
+        errMsg = e.response.data.detail;
+      } else {
+        errMsg = "Some error occured";
+      }
+      return rejectWithValue(errMsg);
     }
   }
 );
@@ -78,9 +88,10 @@ const authSlice = createSlice({
         state.status = "succeeded";
 
         // Get user_id from access token
-        const tokenParts = JSON.parse(
-          atob(action.payload.access.split(".")[1])
-        );
+        // const tokenParts = JSON.parse(
+        //   atob(action.payload.access.split(".")[1])
+        // );
+        const tokenParts = jwt_decode(action.payload.access);
 
         state.userId = tokenParts.user_id;
       })

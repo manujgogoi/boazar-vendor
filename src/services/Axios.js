@@ -38,19 +38,22 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (typeof error.response === "undefined") {
-      console
-        .log
-        // "A Server/Network error occured. Looks like CORS might be the problem."
-        ();
-      return Promise.reject(error);
+    if (
+      error.message === "Network Error" &&
+      typeof error.response === "undefined"
+    ) {
+      // console
+      //   .log
+      //   // "A Server/Network error occured. Looks like CORS might be the problem."
+      //   ();
+      return Promise.reject("Network Error");
     }
 
     if (
       error.response.status === 401 &&
       originalRequest.url === REFRESH_TOKEN_URL
     ) {
-      window.location.href = "/login/";
+      // window.location.href = "/login/";
       return Promise.reject(error);
     }
 

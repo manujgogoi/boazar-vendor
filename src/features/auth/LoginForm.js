@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
+import jwt_decode from "jwt-decode";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.min.css";
 
 import { userLoginAsync } from "./authSlice";
 import { updateUserVendorAsync } from "../vendor/vendorSlice";
@@ -77,46 +80,34 @@ export const LoginForm = () => {
         .unwrap()
         .then((res) => {
           // Update Vendor Store after successfull login
-          const tokenParts = JSON.parse(atob(res.access.split(".")[1]));
+          // const tokenParts = JSON.parse(atob(res.access.split(".")[1]));
+          const tokenParts = jwt_decode(res.access);
           const userId = tokenParts.user_id;
           dispatch(updateUserVendorAsync(userId));
         })
         .catch((error) => {
+          toast.error(<span>{error}</span>, { theme: "colored" });
+
           setLocalState({
             ...localState,
             isLoading: false,
-            error: error,
           });
         });
     }
     return false;
   };
 
-  const ErrorElement = () => {
-    if (localState.error) {
-      return Object.keys(localState.error).map((keyName, i) => (
-        <li key={i}>
-          {keyName} :{" "}
-          {typeof keyName == "string"
-            ? localState.error[keyName]
-            : localState.error[keyName][i]}
-        </li>
-      ));
-    }
-    return "";
-  };
-
   return (
     <div>
       {isLoggedIn && <Navigate to={from.pathname} replace />}
       <h3>Login user</h3>
-      <ErrorElement />
       <form>
         <div>
           <label htmlFor="email">Email :</label>
           <input
             type="text"
             id="email"
+            data-testid="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
